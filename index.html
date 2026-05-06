@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel M&C</title>
+<title>Dashboard Projetos Mandelli & Carvalho</title>
 <style>
 :root { color-scheme: light; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,7 +262,7 @@ input[type=text]:focus { border-color: #7B2828; }
   <div class="brand">
     <div style="font-size:24px">🏗️</div>
     <div>
-      <div class="brand-name">Mandelli &amp; Carvalho</div>
+      <div class="brand-name">Dashboard Projetos Mandelli &amp; Carvalho</div>
       <div class="brand-sub" id="syncLabel">Carregando dados...</div>
     </div>
   </div>
@@ -472,7 +472,7 @@ function renderGeral() {
 
   document.getElementById('geralContent').innerHTML =
     '<div class="kpi-row">' +
-      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Itens</div></div>' +
+      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Projetos</div></div>' +
       '<div class="kpi k-vencido">  <div class="kpi-num">'+counts.Vencido+'</div><div class="kpi-label">🔴 Vencidos</div></div>' +
       '<div class="kpi k-avencer">  <div class="kpi-num">'+counts['À Vencer']+'</div><div class="kpi-label">🟡 À Vencer</div></div>' +
       '<div class="kpi k-concluido"><div class="kpi-num">'+counts.Concluído+'</div><div class="kpi-label">✅ Concluídos</div></div>' +
