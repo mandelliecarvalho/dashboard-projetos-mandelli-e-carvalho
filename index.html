@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Projetos Mandelli e Carvalho</title>
+<title>Painel M&C</title>
 <style>
 :root { color-scheme: light; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,6 +195,65 @@ input[type=text]:focus { border-color: #7B2828; }
 }
 .section-hdr span { background: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
 .dow { font-size: 9px; font-weight: 700; opacity: 0.45; letter-spacing: 0.3px; margin-left: 2px; }
+
+/* ══════════════════════════════════════════
+   MOBILE (até 768px)
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  #viewGeral { padding: 12px 12px 24px; }
+
+  /* KPIs em 2 colunas */
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .kpi { padding: 12px 10px; }
+  .kpi-num { font-size: 26px; }
+  .kpi-label { font-size: 9.5px; }
+
+  /* Título das seções */
+  .gs-title { font-size: 11px; margin-bottom: 8px; }
+
+  /* Colunas por categoria: scroll horizontal com colunas fixas */
+  .cat-columns {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cat-columns::-webkit-scrollbar { display: none; }
+  .cat-col {
+    flex: 0 0 140px;
+    min-width: 140px;
+  }
+  .cat-col-header { font-size: 9px; }
+  .mini-card { padding: 8px 10px; border-radius: 8px; }
+  .mini-client { font-size: 11px; }
+  .mini-date { font-size: 9.5px; }
+
+  /* Progresso por categoria em 1 coluna */
+  .disc-progress { grid-template-columns: 1fr; }
+
+  /* Painel: remover filtros laterais em coluna */
+  .filters { flex-direction: column; align-items: stretch; padding: 8px 12px; gap: 8px; }
+  .disc-tabs { gap: 4px; }
+  .dtab { font-size: 10.5px; padding: 4px 8px; }
+  .result-badge { margin-left: 0; text-align: center; }
+  .grid { grid-template-columns: 1fr; padding: 10px 12px 24px; gap: 10px; }
+
+  /* Summary chips */
+  .summary { padding: 8px 12px; gap: 6px; }
+  .chip { font-size: 11.5px; padding: 4px 10px; }
+  .chip-num { font-size: 15px; }
+
+  /* Tabs */
+  .tab { padding: 8px 14px; font-size: 12px; }
+
+  /* Header */
+  .header { padding: 10px 14px; }
+  .brand-name { font-size: 14px; }
+  .sync-btn { font-size: 12px; padding: 6px 12px; }
+}
 </style>
 </head>
 <body>
@@ -203,7 +262,7 @@ input[type=text]:focus { border-color: #7B2828; }
   <div class="brand">
     <div style="font-size:24px">🏗️</div>
     <div>
-      <div class="brand-name">Dashboard Projetos Mandelli &amp; Carvalho</div>
+      <div class="brand-name">Mandelli &amp; Carvalho</div>
       <div class="brand-sub" id="syncLabel">Carregando dados...</div>
     </div>
   </div>
@@ -413,7 +472,7 @@ function renderGeral() {
 
   document.getElementById('geralContent').innerHTML =
     '<div class="kpi-row">' +
-      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Projetos</div></div>' +
+      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Itens</div></div>' +
       '<div class="kpi k-vencido">  <div class="kpi-num">'+counts.Vencido+'</div><div class="kpi-label">🔴 Vencidos</div></div>' +
       '<div class="kpi k-avencer">  <div class="kpi-num">'+counts['À Vencer']+'</div><div class="kpi-label">🟡 À Vencer</div></div>' +
       '<div class="kpi k-concluido"><div class="kpi-num">'+counts.Concluído+'</div><div class="kpi-label">✅ Concluídos</div></div>' +
