@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel M&C</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #F0EBE3; color: #1a1a1a; }
+
+.header {
+  background: linear-gradient(135deg, #5C1A1A 0%, #8B2828 100%);
+  color: white; padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-name { font-size: 16px; font-weight: 700; }
+.brand-sub  { font-size: 11px; opacity: 0.7; margin-top: 1px; }
+.sync-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: white; padding: 7px 16px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600; transition: background 0.2s;
+}
+.sync-btn:hover { background: rgba(255,255,255,0.25); }
+.sync-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.tabs { background: #4A1515; display: flex; padding: 0 20px; gap: 4px; }
+.tab {
+  padding: 10px 20px; cursor: pointer; color: rgba(255,255,255,0.6);
+  font-size: 13px; font-weight: 700; border-bottom: 3px solid transparent;
+  transition: all 0.15s; white-space: nowrap;
+}
+.tab:hover { color: rgba(255,255,255,0.9); }
+.tab.active { color: white; border-bottom-color: #F5C842; }
+
+#viewGeral { display: none; padding: 16px 20px 28px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi {
+  background: white; border-radius: 12px; padding: 16px 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #ccc;
+}
+.kpi.k-vencido   { border-top-color: #C62828; }
+.kpi.k-avencer   { border-top-color: #E65100; }
+.kpi.k-concluido { border-top-color: #2E7D32; }
+.kpi.k-total     { border-top-color: #7B2828; }
+.kpi-num   { font-size: 34px; font-weight: 800; line-height: 1; }
+.kpi-label { font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+.kpi.k-vencido   .kpi-num { color: #C62828; }
+.kpi.k-avencer   .kpi-num { color: #E65100; }
+.kpi.k-concluido .kpi-num { color: #2E7D32; }
+.kpi.k-total     .kpi-num { color: #7B2828; }
+
+.geral-section { margin-bottom: 24px; }
+.gs-title {
+  font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
+  color: #555; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  padding-bottom: 6px; border-bottom: 2px solid #E0D8D0;
+}
+.gs-title .gs-count {
+  background: #7B2828; color: white; border-radius: 10px; padding: 1px 8px; font-size: 11px;
+}
+.gs-title.t-hoje   { color: #C62828; border-bottom-color: #FFCDD2; }
+.gs-title.t-semana { color: #E65100; border-bottom-color: #FFE0B2; }
+.gs-title.t-mes    { color: #1565C0; border-bottom-color: #BBDEFB; }
+.gs-title.t-disc   { color: #4A148C; border-bottom-color: #E1BEE7; }
+
+/* Colunas fixas por categoria */
+.cat-columns { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.cat-col { min-width: 0; }
+.cat-col-header {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+  color: #999; margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+  padding-bottom: 5px; border-bottom: 2px solid #E0D8D0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cat-col-header .cat-badge {
+  background: #F0EBE3; border: 1px solid #D8D0C8; color: #666;
+  border-radius: 7px; padding: 0px 5px; font-size: 9px; font-weight: 700; flex-shrink: 0;
+}
+.cat-col-cards { display: flex; flex-direction: column; gap: 6px; }
+.col-empty { font-size: 10px; color: #DDD; text-align: center; padding: 8px 0; }
+.mini-card {
+  background: white; border-radius: 9px; padding: 11px 14px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.09); display: flex; flex-direction: column;
+  gap: 5px; border-left: 3px solid #ccc;
+}
+.mini-card.mc-hoje   { border-left-color: #C62828; }
+.mini-card.mc-semana { border-left-color: #E65100; }
+.mini-card.mc-mes    { border-left-color: #1565C0; }
+.mini-client { font-size: 12.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-date   { font-size: 11px; font-weight: 600; color: #888; white-space: nowrap; }
+
+/* Progresso */
+.disc-progress { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; }
+.dp-row { background: white; border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+.dp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.dp-name { font-size: 12px; font-weight: 700; }
+.dp-pct  { font-size: 12px; font-weight: 800; color: #2E7D32; }
+.dp-bar  { height: 6px; background: #F0EBE3; border-radius: 3px; overflow: hidden; }
+.dp-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #2E7D32, #66BB6A); transition: width 0.4s; }
+.dp-stats { display: flex; gap: 8px; margin-top: 6px; }
+.dp-stat  { font-size: 10px; display: flex; align-items: center; gap: 3px; }
+
+.empty-msg { color: #bbb; font-size: 13px; padding: 10px 0; }
+
+#viewPainel { display: none; }
+.summary {
+  display: flex; gap: 10px; padding: 10px 20px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.45); border-bottom: 1px solid #DDD5CC;
+}
+.chip {
+  display: flex; align-items: center; gap: 6px; background: white;
+  border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08); cursor: pointer; border: 2px solid transparent; transition: all 0.15s;
+}
+.chip:hover { border-color: #ccc; }
+.chip.active-vencido   { border-color: #C62828; background: #FFEBEE; color: #C62828; }
+.chip.active-avencer   { border-color: #E65100; background: #FFF3E0; color: #E65100; }
+.chip.active-concluido { border-color: #2E7D32; background: #E8F5E9; color: #2E7D32; }
+.chip.active-todos     { border-color: #7B2828; background: #F9F0F0; color: #7B2828; }
+.chip-dot { width: 10px; height: 10px; border-radius: 50%; }
+.chip-num { font-size: 18px; font-weight: 800; margin-left: 2px; }
+
+.filters {
+  background: white; padding: 10px 20px;
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  border-bottom: 2px solid #D8D0C8; position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+}
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+input[type=text] {
+  width: 100%; padding: 8px 12px 8px 32px;
+  border: 1.5px solid #D0C8C0; border-radius: 8px; font-size: 13px; outline: none;
+}
+input[type=text]:focus { border-color: #7B2828; }
+.disc-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.dtab {
+  padding: 5px 11px; border: 1.5px solid #D0C8C0; border-radius: 20px;
+  background: white; cursor: pointer; font-size: 11.5px; font-weight: 600;
+  color: #666; transition: all 0.15s; white-space: nowrap;
+}
+.dtab:hover { border-color: #8B2828; color: #8B2828; }
+.dtab.active { background: #8B2828; border-color: #8B2828; color: white; }
+.result-badge {
+  margin-left: auto; background: #8B2828; color: white;
+  border-radius: 12px; padding: 3px 11px; font-size: 12px; font-weight: 700; white-space: nowrap;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px,1fr)); gap: 12px; padding: 16px 20px 28px; }
+.card {
+  background: white; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.09); transition: box-shadow 0.2s, transform 0.15s;
+  border-left: 4px solid #ccc; display: flex; flex-direction: column;
+}
+.card:hover { box-shadow: 0 5px 16px rgba(0,0,0,0.14); transform: translateY(-2px); }
+.card.v-vencido   { border-left-color: #C62828; }
+.card.v-avencer   { border-left-color: #E65100; }
+.card.v-concluido { border-left-color: #2E7D32; }
+.card-top { padding: 11px 14px 8px; }
+.card-client { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.card-disc {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 6px;
+  padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700;
+  background: #F0EBE3; color: #7B2828; border: 1px solid #DDD5CC;
+}
+.card-mid { padding: 0 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.card-date { font-size: 12px; color: #666; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+}
+.sb-vencido   { background: #FFEBEE; color: #C62828; }
+.sb-avencer   { background: #FFF3E0; color: #D84315; }
+.sb-concluido { background: #E8F5E9; color: #2E7D32; }
+.card-approval { padding: 6px 14px 10px; font-size: 10.5px; color: #aaa; }
+
+.center { text-align: center; padding: 60px 24px; color: #999; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid #E0D8D0; border-top-color: #7B2828;
+  border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.err {
+  background: #FFEBEE; color: #B71C1C; padding: 16px 20px; margin: 20px;
+  border-radius: 10px; font-size: 13px; line-height: 1.6; border-left: 4px solid #EF9A9A;
+}
+.no-cards { grid-column: 1/-1; text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+.section-hdr {
+  grid-column: 1/-1; font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.8px; color: #888; padding: 4px 0 2px; border-bottom: 1px solid #E0D8D0;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-hdr span { background: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.dow { font-size: 9px; font-weight: 700; opacity: 0.45; letter-spacing: 0.3px; margin-left: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div style="font-size:24px">🏗️</div>
+    <div>
+      <div class="brand-name">Mandelli &amp; Carvalho</div>
+      <div class="brand-sub" id="syncLabel">Carregando dados...</div>
+    </div>
+  </div>
+  <button class="sync-btn" id="syncBtn" onclick="loadData()">⟳ Atualizar</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-geral"  onclick="switchTab('geral')">📊 Visão Geral</div>
+  <div class="tab"        id="tab-painel" onclick="switchTab('painel')">🗂️ Painel</div>
+</div>
+
+<div id="viewGeral">
+  <div id="geralContent"><div class="center"><div class="spinner"></div>Carregando...</div></div>
+</div>
+
+<div id="viewPainel">
+  <div class="summary">
+    <div class="chip active-todos" id="chip-todos"     onclick="setStatus('')"        ><span class="chip-dot" style="background:#8B2828"></span>Todos<span class="chip-num" id="n-todos">—</span></div>
+    <div class="chip" id="chip-vencido"   onclick="setStatus('Vencido')"  ><span class="chip-dot" style="background:#C62828"></span>🔴 Vencido<span class="chip-num" id="n-vencido">—</span></div>
+    <div class="chip" id="chip-avencer"   onclick="setStatus('À Vencer')" ><span class="chip-dot" style="background:#E65100"></span>🟡 À Vencer<span class="chip-num" id="n-avencer">—</span></div>
+    <div class="chip" id="chip-concluido" onclick="setStatus('Concluído')"><span class="chip-dot" style="background:#2E7D32"></span>✅ Concluído<span class="chip-num" id="n-concluido">—</span></div>
+  </div>
+  <div class="filters">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="applyFilters()">
+    </div>
+    <div class="disc-tabs">
+      <button class="dtab active" onclick="setDisc(this,'')">🗂️ Todas</button>
+      <button class="dtab" onclick="setDisc(this,'arquitetonico')">📐 Arquitetônico</button>
+      <button class="dtab" onclick="setDisc(this,'preformas')">🧱 Pré Formas</button>
+      <button class="dtab" onclick="setDisc(this,'estrutural')">🏗️ Estrutural</button>
+      <button class="dtab" onclick="setDisc(this,'luminotecnico')">💡 Luminotécnico</button>
+      <button class="dtab" onclick="setDisc(this,'eletrico')">⚡ Elétrico</button>
+      <button class="dtab" onclick="setDisc(this,'hidraulico')">💧 Hidráulico</button>
+    </div>
+    <div class="result-badge" id="resultBadge">—</div>
+  </div>
+  <div id="painelContent"><div class="center"><div class="spinner"></div></div></div>
+</div>
+
+<script>
+// ── CONFIGURAÇÃO ──────────────────────────────────────────────
+const SHEET_ID  = '1L3Bhu__1nHOcvTngxm5QojVhIjEw4L85a0_C-L1yGxA';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv';
+// ─────────────────────────────────────────────────────────────
+
+let allEvents  = [];
+let filtStatus = '';
+let filtDisc   = '';
+
+const TODAY     = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+const WEEK_END  = (() => { const d = new Date(TODAY); const dtu = (7 - d.getDay()) % 7; d.setDate(d.getDate() + (dtu === 0 ? 7 : dtu)); d.setHours(23,59,59,999); return d; })();
+const MONTH_END = (() => { const d = new Date(TODAY.getFullYear(), TODAY.getMonth()+1, 0); d.setHours(23,59,59,999); return d; })();
+
+const DISCS = [
+  { key:'arquitetonico', label:'Arquitetônico',        emoji:'📐' },
+  { key:'preformas',     label:'Pré Formas Estrutural', emoji:'🧱' },
+  { key:'estrutural',    label:'Estrutural',            emoji:'🏗️' },
+  { key:'luminotecnico', label:'Luminotécnico',         emoji:'💡' },
+  { key:'eletrico',      label:'Elétrico',              emoji:'⚡' },
+  { key:'hidraulico',    label:'Hidráulico',            emoji:'💧' },
+];
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function switchTab(t) {
+  document.getElementById('tab-geral').classList.toggle('active',  t==='geral');
+  document.getElementById('tab-painel').classList.toggle('active', t==='painel');
+  document.getElementById('viewGeral').style.display  = t==='geral'  ? 'block' : 'none';
+  document.getElementById('viewPainel').style.display = t==='painel' ? 'block' : 'none';
+}
+
+/* ── CSV PARSER ── */
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const row = []; let cell = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { if (inQ && line[i+1]==='"') { cell+='"'; i++; } else inQ=!inQ; }
+      else if (c === ',' && !inQ) { row.push(cell.trim()); cell=''; }
+      else cell += c;
+    }
+    row.push(cell.trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  const p = str.split('/');
+  if (p.length!==3) return null;
+  const d = new Date(+p[2], +p[1]-1, +p[0]);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = parseDate(dateStr);
+  if (!d) return dateStr;
+  return dateStr + ' <span class="dow">' + DIAS_SEMANA[d.getDay()] + '</span>';
+}
+
+function cleanVal(v) {
+  if (!v) return null;
+  v = v.replace(/#VALUE!/g,'').replace(/\\!/g,'!').trim();
+  return v || null;
+}
+
+function calcStatus(rawStatus, dateStr) {
+  if (rawStatus==='Concluído') return 'Concluído';
+  if (!rawStatus || rawStatus==='Não Contratado') return null;
+  const date = parseDate(dateStr);
+  if (date) return date < TODAY ? 'Vencido' : 'À Vencer';
+  return 'À Vencer';
+}
+
+function parseSheet(csvText) {
+  const rows = parseCSV(csvText);
+  // Pula as 2 primeiras linhas (cabeçalhos)
+  const events = [];
+  for (let i = 2; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[0] || !r[0].trim()) continue;
+    const client = r[0].trim();
+    const proj = {
+      client,
+      approvalDate: cleanVal(r[1]),
+      arquitetonico: { status: r[5]||'', date: cleanVal(r[6]) },
+      preformas:     { status: r[7]||'', date: cleanVal(r[8]) },
+      estrutural:    { status: r[9]||'', date: cleanVal(r[10]) },
+      luminotecnico: { status: r[11]||'', date: cleanVal(r[12]) },
+      eletrico:      { status: r[13]||'', date: cleanVal(r[14]) },
+      hidraulico:    { status: r[15]||'', date: cleanVal(r[16]) },
+    };
+    DISCS.forEach(d => {
+      const disc = proj[d.key];
+      if (!disc || !disc.status) return;
+      const displayStatus = calcStatus(disc.status, disc.date);
+      if (!displayStatus) return;
+      events.push({ client, disc: d.key, discLabel: d.label, discEmoji: d.emoji,
+        rawStatus: disc.status, date: disc.date, displayStatus, approvalDate: proj.approvalDate });
+    });
+  }
+  return events;
+}
+
+/* ── COLUNAS POR CATEGORIA ── */
+function groupedByCategory(list, cardCls) {
+  const sortByDate = arr => [...arr].sort((a,b)=>{ const da=parseDate(a.date),db=parseDate(b.date); return da&&db?da-db:da?-1:1; });
+  const cols = DISCS.map(d => {
+    const group = sortByDate(list.filter(ev => ev.disc === d.key));
+    const cardsHTML = group.length
+      ? group.map(ev =>
+          '<div class="mini-card '+cardCls+'">' +
+            '<div class="mini-client">'+ev.client+'</div>' +
+            '<div class="mini-date">'+fmtDate(ev.date)+'</div>' +
+          '</div>').join('')
+      : '<div class="col-empty">—</div>';
+    return '<div class="cat-col">' +
+      '<div class="cat-col-header">' + d.emoji + ' ' + d.label +
+        (group.length ? ' <span class="cat-badge">'+group.length+'</span>' : '') +
+      '</div>' +
+      '<div class="cat-col-cards">' + cardsHTML + '</div>' +
+    '</div>';
+  }).join('');
+  return '<div class="cat-columns">' + cols + '</div>';
+}
+
+/* ── VISÃO GERAL ── */
+function renderGeral() {
+  const counts = {Vencido:0,'À Vencer':0,Concluído:0};
+  allEvents.forEach(ev => { if(counts[ev.displayStatus]!==undefined) counts[ev.displayStatus]++; });
+
+  const hoje   = allEvents.filter(ev => { const d=parseDate(ev.date); return d && d.getTime()===TODAY.getTime() && ev.displayStatus!=='Concluído'; });
+  const semana = allEvents.filter(ev => { const d=parseDate(ev.date); return d && d>TODAY && d<=WEEK_END && ev.displayStatus!=='Concluído'; });
+  const mes    = allEvents.filter(ev => { const d=parseDate(ev.date); return d && d>WEEK_END && d<=MONTH_END && ev.displayStatus!=='Concluído'; });
+
+  const discStats = {};
+  DISCS.forEach(d => { discStats[d.key]={label:d.label,emoji:d.emoji,total:0,concluido:0,vencido:0,avencer:0}; });
+  allEvents.forEach(ev => {
+    if (!discStats[ev.disc]) return;
+    discStats[ev.disc].total++;
+    if (ev.displayStatus==='Concluído') discStats[ev.disc].concluido++;
+    else if (ev.displayStatus==='Vencido') discStats[ev.disc].vencido++;
+    else discStats[ev.disc].avencer++;
+  });
+
+  const discProgressHTML = DISCS.map(d => {
+    const s = discStats[d.key];
+    const pct = s.total ? Math.round(s.concluido/s.total*100) : 0;
+    return '<div class="dp-row">' +
+      '<div class="dp-head"><div class="dp-name">'+d.emoji+' '+d.label+'</div><div class="dp-pct">'+pct+'%</div></div>' +
+      '<div class="dp-bar"><div class="dp-fill" style="width:'+pct+'%"></div></div>' +
+      '<div class="dp-stats">' +
+        '<div class="dp-stat" style="color:#2E7D32">✅ '+s.concluido+'</div>' +
+        '<div class="dp-stat" style="color:#E65100">🟡 '+s.avencer+'</div>' +
+        '<div class="dp-stat" style="color:#C62828">🔴 '+s.vencido+'</div>' +
+      '</div></div>';
+  }).join('');
+
+  const nomeMes = MESES[TODAY.getMonth()];
+
+  document.getElementById('geralContent').innerHTML =
+    '<div class="kpi-row">' +
+      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Itens</div></div>' +
+      '<div class="kpi k-vencido">  <div class="kpi-num">'+counts.Vencido+'</div><div class="kpi-label">🔴 Vencidos</div></div>' +
+      '<div class="kpi k-avencer">  <div class="kpi-num">'+counts['À Vencer']+'</div><div class="kpi-label">🟡 À Vencer</div></div>' +
+      '<div class="kpi k-concluido"><div class="kpi-num">'+counts.Concluído+'</div><div class="kpi-label">✅ Concluídos</div></div>' +
+    '</div>' +
+    '<div class="geral-section"><div class="gs-title t-hoje">🔥 Vencendo Hoje <span class="gs-count">'+hoje.length+'</span></div>'+groupedByCategory(hoje,'mc-hoje')+'</div>' +
+    '<div class="geral-section"><div class="gs-title t-semana">📅 Vence Esta Semana <span class="gs-count">'+semana.length+'</span></div>'+groupedByCategory(semana,'mc-semana')+'</div>' +
+    '<div class="geral-section"><div class="gs-title t-mes">🗓️ Vence Este Mês — '+nomeMes+' <span class="gs-count">'+mes.length+'</span></div>'+groupedByCategory(mes,'mc-mes')+'</div>' +
+    '<div class="geral-section"><div class="gs-title t-disc">📊 Progresso por Categoria</div><div class="disc-progress">'+discProgressHTML+'</div></div>';
+}
+
+/* ── PAINEL ── */
+function scCard(s)  { return s==='Vencido'?'v-vencido':s==='À Vencer'?'v-avencer':s==='Concluído'?'v-concluido':''; }
+function scBadge(s) { return s==='Vencido'?'sb-vencido':s==='À Vencer'?'sb-avencer':'sb-concluido'; }
+function icon(s)    { return s==='Vencido'?'🔴':s==='À Vencer'?'🟡':'✅'; }
+
+function renderCard(ev) {
+  return '<div class="card '+scCard(ev.displayStatus)+'">' +
+    '<div class="card-top"><div class="card-client">'+ev.client+'</div><div class="card-disc">'+ev.discEmoji+' '+ev.discLabel+'</div></div>' +
+    '<div class="card-mid"><div class="card-date">📅 '+fmtDate(ev.date)+'</div><div class="status-badge '+scBadge(ev.displayStatus)+'">'+icon(ev.displayStatus)+' '+ev.displayStatus+'</div></div>' +
+    '<div class="card-approval">'+(ev.approvalDate?'Aprovação: '+fmtDate(ev.approvalDate):'Aprovação: Pendente')+'</div>' +
+  '</div>';
+}
+
+function sortEvents(list) {
+  const order={'Vencido':0,'À Vencer':1,'Concluído':2};
+  return [...list].sort((a,b)=>{
+    const oa=order[a.displayStatus]??3, ob=order[b.displayStatus]??3;
+    if(oa!==ob) return oa-ob;
+    const da=parseDate(a.date), db=parseDate(b.date);
+    if(da&&db) return da-db;
+    return da?-1:db?1:a.client.localeCompare(b.client);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  let list = allEvents.filter(ev => {
+    if (search && !ev.client.toLowerCase().includes(search)) return false;
+    if (filtDisc   && ev.disc!==filtDisc) return false;
+    if (filtStatus && ev.displayStatus!==filtStatus) return false;
+    return true;
+  });
+  const sorted = sortEvents(list);
+  document.getElementById('resultBadge').textContent = sorted.length+' itens';
+  if (!sorted.length) { document.getElementById('painelContent').innerHTML='<div class="grid"><div class="no-cards">Nenhum item encontrado.</div></div>'; return; }
+  let html='';
+  if (!filtStatus) {
+    const groups={};
+    sorted.forEach(ev=>{(groups[ev.displayStatus]=groups[ev.displayStatus]||[]).push(ev);});
+    const labels={'Vencido':'🔴 Vencido','À Vencer':'🟡 À Vencer','Concluído':'✅ Concluído'};
+    ['Vencido','À Vencer','Concluído'].forEach(s=>{ const g=groups[s]; if(!g||!g.length) return; html+='<div class="section-hdr">'+labels[s]+'<span>'+g.length+'</span></div>'+g.map(renderCard).join(''); });
+  } else { html=sorted.map(renderCard).join(''); }
+  document.getElementById('painelContent').innerHTML='<div class="grid">'+html+'</div>';
+}
+
+function updateSummary() {
+  const counts={'Vencido':0,'À Vencer':0,'Concluído':0};
+  allEvents.forEach(ev=>{if(counts[ev.displayStatus]!==undefined) counts[ev.displayStatus]++;});
+  document.getElementById('n-todos').textContent    =allEvents.length;
+  document.getElementById('n-vencido').textContent  =counts['Vencido'];
+  document.getElementById('n-avencer').textContent  =counts['À Vencer'];
+  document.getElementById('n-concluido').textContent=counts['Concluído'];
+}
+
+function setStatus(s) {
+  filtStatus=s;
+  const map={'':'todos','Vencido':'vencido','À Vencer':'avencer','Concluído':'concluido'};
+  const cls={'':'active-todos','Vencido':'active-vencido','À Vencer':'active-avencer','Concluído':'active-concluido'};
+  document.querySelectorAll('.chip').forEach(c=>{ c.className='chip'+(c.id==='chip-'+map[s]?' '+cls[s]:''); });
+  applyFilters();
+}
+function setDisc(btn,disc) {
+  filtDisc=disc;
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+/* ── CARREGAMENTO VIA FETCH ── */
+async function loadData() {
+  const btn = document.getElementById('syncBtn');
+  btn.disabled=true; btn.textContent='⟳ Sincronizando...';
+  document.getElementById('syncLabel').textContent='Sincronizando...';
+  try {
+    const res = await fetch(SHEET_URL);
+    if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+    const csv = await res.text();
+    if (!csv || csv.length < 50) throw new Error('Planilha vazia ou inacessível.');
+    allEvents = parseSheet(csv);
+    if (!allEvents.length) throw new Error('Nenhum projeto encontrado na planilha.');
+    const now = new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+    document.getElementById('syncLabel').textContent = 'Atualizado: ' + now;
+    updateSummary();
+    renderGeral();
+    applyFilters();
+  } catch(err) {
+    const errHTML = '<div class="err">❌ <strong>Erro ao carregar:</strong> ' + (err.message||err) + '</div>';
+    document.getElementById('geralContent').innerHTML = errHTML;
+    document.getElementById('painelContent').innerHTML = errHTML;
+    document.getElementById('syncLabel').textContent = 'Erro — tente atualizar';
+  } finally {
+    btn.disabled=false; btn.textContent='⟳ Atualizar';
+  }
+}
+
+switchTab('geral');
+loadData();
+</script>
+</body>
+</html>
