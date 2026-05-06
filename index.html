@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Projetos Mandelli & Carvalho</title>
+<title>Painel M&C</title>
 <style>
 :root { color-scheme: light; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,7 +262,7 @@ input[type=text]:focus { border-color: #7B2828; }
   <div class="brand">
     <div style="font-size:24px">🏗️</div>
     <div>
-      <div class="brand-name">Dashboard Projetos Mandelli &amp; Carvalho</div>
+      <div class="brand-name">Mandelli &amp; Carvalho</div>
       <div class="brand-sub" id="syncLabel">Carregando dados...</div>
     </div>
   </div>
@@ -455,24 +455,25 @@ function renderGeral() {
     else discStats[ev.disc].avencer++;
   });
 
-  const discProgressHTML = DISCS.map(d => {
-    const s = discStats[d.key];
-    const pct = s.total ? Math.round(s.concluido/s.total*100) : 0;
-    return '<div class="dp-row">' +
-      '<div class="dp-head"><div class="dp-name">'+d.emoji+' '+d.label+'</div><div class="dp-pct">'+pct+'%</div></div>' +
-      '<div class="dp-bar"><div class="dp-fill" style="width:'+pct+'%"></div></div>' +
-      '<div class="dp-stats">' +
-        '<div class="dp-stat" style="color:#2E7D32">✅ '+s.concluido+'</div>' +
-        '<div class="dp-stat" style="color:#E65100">🟡 '+s.avencer+'</div>' +
-        '<div class="dp-stat" style="color:#C62828">🔴 '+s.vencido+'</div>' +
-      '</div></div>';
-  }).join('');
+  const discProgressHTML = [...DISCS]
+    .map(d => { const s = discStats[d.key]; return { d, s, pct: s.total ? Math.round(s.concluido/s.total*100) : 0 }; })
+    .sort((a, b) => b.pct - a.pct)
+    .map(({ d, s, pct }) =>
+      '<div class="dp-row">' +
+        '<div class="dp-head"><div class="dp-name">'+d.emoji+' '+d.label+'</div><div class="dp-pct">'+pct+'%</div></div>' +
+        '<div class="dp-bar"><div class="dp-fill" style="width:'+pct+'%"></div></div>' +
+        '<div class="dp-stats">' +
+          '<div class="dp-stat" style="color:#2E7D32">✅ '+s.concluido+'</div>' +
+          '<div class="dp-stat" style="color:#E65100">🟡 '+s.avencer+'</div>' +
+          '<div class="dp-stat" style="color:#C62828">🔴 '+s.vencido+'</div>' +
+        '</div></div>'
+    ).join('');
 
   const nomeMes = MESES[TODAY.getMonth()];
 
   document.getElementById('geralContent').innerHTML =
     '<div class="kpi-row">' +
-      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Projetos</div></div>' +
+      '<div class="kpi k-total">    <div class="kpi-num">'+allEvents.length+'</div><div class="kpi-label">Total de Itens</div></div>' +
       '<div class="kpi k-vencido">  <div class="kpi-num">'+counts.Vencido+'</div><div class="kpi-label">🔴 Vencidos</div></div>' +
       '<div class="kpi k-avencer">  <div class="kpi-num">'+counts['À Vencer']+'</div><div class="kpi-label">🟡 À Vencer</div></div>' +
       '<div class="kpi k-concluido"><div class="kpi-num">'+counts.Concluído+'</div><div class="kpi-label">✅ Concluídos</div></div>' +
